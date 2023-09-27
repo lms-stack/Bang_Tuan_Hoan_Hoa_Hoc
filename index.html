@@ -1,0 +1,3228 @@
+<!doctype html>
+<html lang="en-US" data-iso="en" data-wiki="en" dir="ltr" class="Property" data-wide="0" translate="no">
+<!-- toggled classes: Sidebar, Collapse, [Tab], Dark, SmoothResize, NoTransitions, FullScreen -->
+
+<head>
+	<title>Bảng Tuần Hoàn Hóa Học</title>
+	<script>
+		const dark_os_theme = window.matchMedia("(prefers-color-scheme: dark)").matches;
+		const theme_set = localStorage.getItem("Theme");
+		const dark_set = localStorage.getItem("Theme") === "Dark";
+		const layout_set = localStorage.getItem("Layout");
+		const layout_sidebar_set = localStorage.getItem("Layout") === "Sidebar";
+		const wide_enough_but_not_tall = window.matchMedia("(min-width: 1200px) and (min-aspect-ratio: 6/5), (min-width: 1024px) and (min-aspect-ratio: 6/5) and (-webkit-min-device-pixel-ratio: 2)").matches;
+
+		if (dark_set || (dark_os_theme && !theme_set)) {
+			document.documentElement.classList.add("Dark");
+			document.documentElement.style.colorScheme = "dark";
+		}
+		if (layout_sidebar_set || (wide_enough_but_not_tall && !layout_set))
+			document.documentElement.classList.add("Sidebar");
+
+		window.CACHE_NAME = "dd8f737";
+		window.PropertiesURL = "/JSON/properties-90d5338.json";
+		window.releaseStage = "production";
+	</script>
+
+	<meta name="description"
+		content="Interactive periodic table showing names, electrons, and oxidation states. Visualize trends, 3D orbitals, isotopes, and mix compounds. Fully descriptive writeups.">
+	<meta name="twitter:card" content="summary">
+	<meta property="og:title" content="Bảng Tuần Hoàn Hóa Học">
+	<meta property="og:description"
+		content="Interactive periodic table showing names, electrons, and oxidation states. Visualize trends, 3D orbitals, isotopes, and mix compounds. Fully descriptive writeups.">
+	<meta property="og:image" content="https://blog.marathon.edu.vn/wp-content/uploads/2022/02/khai-niem-phan-ung-hoa-hoc.jpg">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#0276FD">
+	<meta name="format-detection" content="telephone=no">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<link rel="icon" href="/icon/pt-square.svg">
+	<link rel="apple-touch-icon" href="icon/pt-square-192.png">
+
+	<link rel="canonical" href="https://ptable.com/?lang=en">
+	<link rel="manifest" href="/manifest/ptable.en.webmanifest" crossorigin="use-credentials">
+
+	<meta name="monetization" content="$ilp.uphold.com/Bw3wHNJbi7YJ">
+
+	<style>
+		:root {
+			--solid: #000;
+			--liquid: #00D;
+			--gas: #900;
+			--unknown: #676;
+			--heat-gradient: linear-gradient(to right, rgb(100, 100, 255), rgb(238, 238, 238), yellow, orange, red);
+
+			--body-bg: rgb(243, 246, 248);
+			--body-bg-trans: rgba(243, 246, 248, 0);
+			--blocks: rgb(255, 255, 255);
+			--text: 0, 0, 0;
+			--darkshadow: rgba(0, 0, 0, 0.24);
+			--lightshadow: rgba(0, 0, 0, 0.12);
+			--hovered: #f5f8fa;
+			--selected: #DDD;
+			--group: #003660;
+			--invert: 0;
+			--nodata: hsl(0, 0%, 90%);
+
+			--lock: 1;
+			--element-pad: 0.05rem;
+			--base-vw: 1.8;
+			--sidebar-shrink: 1;
+			--margin: 0.3rem;
+			--min: 768px;
+			--square-vw: 18;
+			--minfont: calc(var(--base-vw) * var(--min) / var(--sidebar-shrink) / 100);
+			--property-rows: 6;
+			--row-height: calc((var(--square) - var(--2margin)) / var(--property-rows));
+			--groups: 18;
+			--grid-space: calc(5 * var(--aspect-ratio));
+			/* HACK: these are too complex */
+			--icon-height: 1rem;
+			--tab-height: calc(var(--icon-height) + var(--2margin));
+			--border-width: calc(var(--gridgap) / 2);
+			--track-height: var(--2margin);
+			--periods: 1em;
+			--button-size: calc(2 * var(--track-height));
+			--bordercolor: rgba(var(--text), 0.12);
+			--logo-ratio: calc(280 / 121.1);
+			--rtl: 1;
+
+			--tab-active: rgb(2, 118, 253);
+			--tab-hover: rgb(45, 190, 252);
+			--tab-inactive: #999;
+
+			/*** Derived ***/
+			--2margin: calc(var(--margin) * 2);
+			--gridgap: calc(var(--grid-space) * var(--sidebar-shrink) / var(--groups));
+			--fixedgridgap: var(--gridgap);
+			/* HACK: these are too complex */
+			--fixedborderwidth: var(--border-width);
+			--groupfactor: calc(1 + (var(--groups) - 18) / 18);
+
+			--alkali: hsl(48deg, 77%, 64%);
+			--alkaline: hsl(60deg, 83%, 67%);
+			--lanthanoid: hsl(42deg, 62%, 76%);
+			--actinoid: hsl(340deg, 67%, 88%);
+			--transition: hsl(12deg, 87%, 85%);
+			--poor: hsl(192deg, 62%, 80%);
+			--metalloid: hsl(165deg, 58%, 76%);
+			--nonmetal: hsl(120deg, 73%, 74%);
+			--noble: hsl(300deg, 44%, 82%);
+
+			--nocategory: #EEE;
+			--divider: #CEF;
+			--divideroutline: #AAF;
+			--dividerhover: #BBF;
+		}
+
+		:root[dir="rtl"] {
+			--rtl: -1;
+			--heat-gradient: linear-gradient(to left, rgb(100, 100, 255), var(--blocks), yellow, orange, red);
+		}
+
+		.KeyRegion {
+			--margin: calc(0.3rem * var(--sidebar-shrink));
+			--2margin: calc(var(--margin) * 2);
+		}
+
+		.Dark {
+			--bordercolor: rgba(var(--text), 0.2);
+
+			--solid: #b5b5b5;
+			--liquid: #99F;
+			--gas: #F44;
+			--unknown: #777;
+			--nodata: #333;
+
+			--body-bg: rgb(0, 0, 0);
+			--body-bg-trans: rgba(0, 0, 0, 0);
+			--blocks: #191919;
+			--text: 222, 222, 222;
+			--darkshadow: rgba(255, 255, 255, 0.24);
+			--lightshadow: rgba(255, 255, 255, 0.12);
+			/* needed by safari */
+			--hovered: #141D26;
+			--selected: #393939;
+			--group: #aaa5f3;
+			--invert: 1;
+
+			--tab-active: #588ffe;
+			--tab-inactive: #999;
+
+			--alkali: #6c3b01;
+			--alkaline: #846011;
+			--lanthanoid: #402c17;
+			--actinoid: #732e4c;
+			--transition: #711019;
+			--poor: #003666;
+			--metalloid: #015146;
+			--nonmetal: #3e6418;
+			--noble: #3a2151;
+			--nocategory: #222;
+			--divider: #00A;
+			--divideroutline: #00D;
+			--dividerhover: #00B;
+		}
+
+		/*** Undone in interactive ***/
+		.KeyRegion> :not(.SeriesState) {
+			display: none;
+		}
+
+		/* Hidden properties, must be done early */
+		.DataRegion .Resets,
+		.DataRegion .Compounds {
+			display: none !important;
+		}
+
+		* {
+			box-sizing: border-box;
+			/* Admit it, IE got this right and the initial standard was dumb */
+		}
+
+		.NoTransitions * {
+			transition: all 0.05s linear !important;
+		}
+
+		html,
+		body {
+			font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+			background-color: var(--body-bg);
+			color: rgb(var(--text));
+		}
+
+		body {
+			margin: 0;
+		}
+
+		/*** Anchors ***/
+		.Dark a[href]:not(figure *) {
+			color: var(--tab-active);
+		}
+
+		.Dark a:visited:not(figure *) {
+			color: var(--group);
+		}
+
+		footer a,
+		.KeyRegion a,
+		.Group>a {
+			text-decoration: inherit;
+		}
+
+		main :not(data)>a[href]:hover {
+			outline: medium solid var(--tab-hover);
+			outline-offset: 0.09rem;
+		}
+
+		footer a:hover {
+			text-decoration: underline;
+		}
+
+		a[href^="#"]:hover {
+			outline: none;
+		}
+
+		/*** Reset ***/
+		dd {
+			margin: 0;
+		}
+
+		ul,
+		ol {
+			list-style-type: none;
+			padding-inline-start: 0;
+		}
+
+		/*** Box shadows ***/
+		header,
+		.Raised+label,
+		.adsbygoogle[data-adsbygoogle-status="done"],
+		ol,
+		input[type="search"],
+		[value="expandedconfig"]+li>output>b::before,
+		ul>li {
+			background-color: var(--blocks);
+			box-shadow: 0 1px 3px var(--lightshadow), 0 1px 2px var(--darkshadow);
+		}
+
+		.Raised+label:hover,
+		.Raised:focus+* {
+			box-shadow: 0 2px 4px var(--lightshadow), 0 2px 3px var(--darkshadow);
+		}
+
+		figure {
+			box-shadow: 0 1px 3px var(--lightshadow), 0 1px 2px var(--darkshadow),
+				inset 0 1px 3px rgba(0, 0, 0, 0.12), inset 0 1px 2px rgba(0, 0, 0, 0.24);
+		}
+
+		.Raised:checked+label {
+			box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.24), inset 0 1px 2px rgba(0, 0, 0, 0.48);
+		}
+
+		.Expand {
+			box-shadow: 0 19px 38px var(--darkshadow), 0 15px 12px var(--lightshadow);
+		}
+
+		figure>iframe {
+			box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12), inset 0 1px 2px rgba(0, 0, 0, 0.24);
+		}
+
+		/*** Header ***/
+		body>h1 {
+			display: none;
+		}
+
+		header {
+			font-size: 0.9em;
+			font-weight: 500;
+			letter-spacing: -0.02em;
+		}
+
+		header,
+		nav {
+			display: flex;
+		}
+
+		.Logo+label img {
+			display: block;
+		}
+
+		header label {
+			display: flex;
+			align-items: center;
+		}
+
+		header label>a,
+		header label>a[href]:hover {
+			text-decoration: inherit;
+			color: inherit !important;
+		}
+
+		header svg+a {
+			margin-inline-start: calc(var(--margin) / 2);
+		}
+
+		header>label svg,
+		nav>label svg {
+			height: var(--tab-height);
+		}
+
+		.Raised+label svg {
+			height: var(--icon-height);
+		}
+
+		.Logo+label img {
+			width: calc(var(--tab-height) * var(--logo-ratio));
+		}
+
+		.Button+label {
+			margin: calc(1.25 * var(--margin)) var(--margin);
+		}
+
+		.Raised+label {
+			padding: 0 var(--margin);
+			border-radius: var(--margin);
+			background-color: var(--body-bg);
+		}
+
+		.Logo+label,
+		.WideButton+label,
+		nav>label {
+			padding: 0 var(--2margin);
+		}
+
+		header>input:last-of-type+label {
+			padding-inline-end: var(--margin);
+		}
+
+		header label {
+			color: var(--tab-inactive);
+		}
+
+		header input+ :hover,
+		header :focus+label {
+			color: var(--tab-hover);
+			background-color: var(--body-bg);
+		}
+
+		header :checked+label {
+			color: var(--tab-active);
+			background-color: var(--body-bg);
+		}
+
+		header .Flat+label {
+			background-color: unset;
+		}
+
+		nav :checked+label {
+			box-shadow: inset 0 -0.25em currentColor;
+		}
+
+		.Raised:checked+label {
+			background-color: var(--tab-active);
+			color: var(--blocks);
+		}
+
+		.Toggle.Left+label {
+			margin-right: 0;
+			border-top-right-radius: 0;
+			border-bottom-right-radius: 0;
+		}
+
+		.Toggle.Right+label {
+			margin-left: 0;
+			border-top-left-radius: 0;
+			border-bottom-left-radius: 0;
+		}
+
+		header input:last-of-type+label,
+		.WideButton+label {
+			margin-inline-start: auto;
+		}
+
+		.MenuButton+label {
+			display: none;
+		}
+
+		/*** SVG ***/
+		header svg>g {
+			stroke-width: 5;
+			stroke: currentColor;
+			fill: currentColor;
+		}
+
+		.Magnify g,
+		.Toggle+label g {
+			stroke-width: 9;
+		}
+
+		nav :checked+* polyline,
+		nav :checked+* polygon,
+		nav :checked+* rect,
+		nav :checked+* circle,
+		nav :checked+* path,
+		nav :checked+* line {
+			stroke: var(--body-bg);
+		}
+
+		nav :checked+* circle,
+		nav :checked+* path,
+		nav :checked+* polygon,
+		nav :checked+* rect {
+			fill: currentColor;
+		}
+
+		.FillMask {
+			fill: var(--blocks);
+		}
+
+		input+label:hover .FillMask {
+			fill: var(--body-bg);
+		}
+
+		:checked+* .Dots circle {
+			stroke: currentColor;
+		}
+
+		/*** Side/topbar ***/
+		main {
+			display: flex;
+		}
+
+		main>article {
+			display: flex;
+			flex-direction: column;
+			flex-grow: 1;
+			/* sidebar zh */
+		}
+
+		aside {
+			display: flex;
+			flex-basis: var(--square);
+			overflow: hidden;
+		}
+
+		.Collapse aside,
+		.Reset aside {
+			opacity: 0;
+			flex-basis: 0;
+			visibility: hidden;
+		}
+
+		/* Side bar, landscape */
+		.Sidebar {
+			--square-vw: 20;
+		}
+
+		@media (max-width: 1200px) {
+
+			/* iPad width or so */
+			.Sidebar {
+				--square-vw: 24;
+			}
+		}
+
+		.Sidebar .DataRegion {
+			flex-grow: 1;
+			flex-basis: 0;
+			/* basis 0 plus grow 1 expands to height of sibling! */
+		}
+
+		.Sidebar .DataRegion>* {
+			display: initial;
+		}
+
+		.Sidebar main {
+			flex-direction: row;
+			min-width: 0;
+		}
+
+		.Sidebar aside {
+			flex-direction: column;
+			flex-shrink: 0;
+			min-width: 0;
+		}
+
+		.Sidebar aside figure {
+			align-self: center;
+			font-size: 2.1em;
+			height: 3.5em;
+			width: 3.5em;
+			flex: unset;
+		}
+
+		.Sidebar aside ul>li {
+			min-height: 2.5em;
+			padding: 0 calc(var(--margin) * 1.5);
+		}
+
+		.Sidebar main>article {
+			transition: width 0.3s linear;
+			min-width: 0;
+		}
+
+		.Sidebar:not(.Reset):not(.Collapse) {
+			--sidebar-shrink: calc(1 - (var(--square-vw) + 2) / 100);
+			/* 2% breathing room */
+		}
+
+		.Sidebar[data-wide="15"] aside>figure {
+			display: none;
+		}
+
+		.Sidebar[data-wide="15"] .Sidebar.Collapse,
+		.Sidebar.Reset {
+			--sidebar-shrink: 1;
+		}
+
+		.Sidebar canvas {
+			height: unset;
+		}
+
+		/*** CloseUp box ***/
+		figure {
+			border: var(--margin) solid rgba(var(--text), 0.08);
+		}
+
+		figure a {
+			color: inherit;
+			text-decoration: inherit;
+		}
+
+		figure:hover a {
+			color: var(--tab-active);
+			text-decoration: revert;
+		}
+
+		aside figure {
+			font-size: 2.8em;
+			padding: var(--margin);
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			text-shadow: 0 1px 2px rgba(var(--text), 0.2);
+			flex: 0 0 calc(var(--square) - var(--2margin));
+			min-width: 0;
+			white-space: nowrap;
+		}
+
+		figure>output {
+			min-width: 0;
+		}
+
+		figure>output,
+		figure>small {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			line-height: 1;
+		}
+
+		figure>small {
+			min-width: 1.2em;
+			/* HACK: magic number */
+		}
+
+		/*** Radio button boxes ***/
+		ul {
+			display: grid;
+			grid-auto-flow: column;
+			grid-auto-columns: 1fr;
+			grid-template-rows: repeat(var(--property-rows), auto);
+			grid-gap: 0 var(--2margin);
+			margin: 0;
+			scrollbar-width: none;
+		}
+
+		ul.CompoundResults {
+			display: initial;
+		}
+
+		ul::-webkit-scrollbar {
+			display: none;
+		}
+
+		.CompoundResults>li {
+			flex-wrap: wrap;
+		}
+
+		ul>li>select {
+			margin-inline-end: calc(-1 * var(--margin));
+			font: inherit;
+			border: none;
+			color: GrayText;
+			background-color: unset;
+		}
+
+		ul>li>label>select {
+			color: inherit;
+			font: inherit;
+			border: none;
+			background-color: var(--body-bg);
+			/* MAYBE */
+		}
+
+		ul>li>a {
+			text-align: end;
+			/* push 2nd compounds right */
+		}
+
+		ul>li>output {
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		ul>li.HideStart>output {
+			direction: rtl;
+			text-align: left;
+		}
+
+		ul>li:hover>output {
+			direction: unset;
+			white-space: initial;
+			overflow: initial;
+			text-align: end;
+		}
+
+		ul>li>a~a {
+			flex-basis: 100%;
+		}
+
+		ul>li {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			/* push sidebar compounds right */
+			padding: 0 var(--2margin);
+			break-inside: avoid;
+			outline: 0 solid var(--tab-hover);
+		}
+
+		aside ul>li {
+			min-height: var(--row-height);
+		}
+
+		.DataRegion ul>li>label {
+			margin-inline-end: var(--margin);
+			white-space: nowrap;
+			flex-grow: 1;
+		}
+
+		ul>li:hover {
+			background-color: var(--hovered);
+		}
+
+		ul>input:checked+li {
+			background-color: var(--selected);
+		}
+
+		ul:not(.CompoundResults)>li:hover {
+			outline-width: var(--fixedgridgap);
+			z-index: 2;
+		}
+
+		ul:not(.CompoundResults)>input:focus+li {
+			outline-width: var(--fixedgridgap);
+			outline-color: LinkText;
+			z-index: 3;
+		}
+
+		.DataRegion ul>li>* {
+			overflow-wrap: break-word;
+			hyphens: auto;
+		}
+
+		.KeyRegion ul>li {
+			overflow-wrap: anywhere;
+		}
+
+		/*** Unit selects ***/
+		.electric>select:not(.electric),
+		.thermal>select:not(.thermal),
+		.specific>select:not(.specific),
+		.vaporization>select:not(.vaporization),
+		.fusion>select:not(.fusion) {
+			display: none;
+		}
+
+		/*** Properties ***/
+		.Properties {
+			grid-auto-columns: 32fr 33fr 35fr;
+			/* BUG: find less jittery values for russian: https://developer.mozilla.org/en-US/docs/Web/CSS/grid-auto-columns */
+		}
+
+		/*** Slider ***/
+		.Slider {
+			position: sticky;
+			left: var(--margin);
+			display: flex;
+			overflow: hidden;
+			align-items: center;
+			margin-inline-start: var(--margin);
+		}
+
+		[dir="rtl"] .Slider {
+			left: unset;
+			right: var(--margin);
+		}
+
+		.Slider>div,
+		.Slider>label {
+			margin: var(--margin) var(--2margin);
+		}
+
+		.Slider input[type="button"] {
+			padding: 0 0.1em;
+			font-size: inherit;
+		}
+
+		.RangeNumbers {
+			display: flex;
+			align-items: baseline;
+			margin: auto;
+			white-space: nowrap;
+		}
+
+		.RangeNumbers>input {
+			margin-inline-start: var(--margin);
+		}
+
+		.RangeNumbers>label {
+			margin-inline-end: var(--margin);
+		}
+
+		input[type="number"]:out-of-range {
+			background-color: #FCC;
+		}
+
+		.Slider {
+			flex-basis: 0;
+			visibility: hidden;
+			opacity: 0;
+		}
+
+		.Reset .SliderTemp,
+		.Property .series .SliderTemp,
+		.Property .name .SliderTemp,
+		.Property .state .SliderTemp,
+		.Property .melt .SliderTemp,
+		.Property .boil .SliderTemp,
+		.Property .discover .SliderYear {
+			flex-basis: 2.1em
+				/* HACK: fixed size allows transition */
+			;
+			visibility: visible;
+			opacity: 1;
+		}
+
+		.Property .name ol>li,
+		.Isotope .isoname ol>li.Tope,
+		.Isotope ol>li:not(.Tope) {
+			cursor: pointer;
+		}
+
+		[type="number"] {
+			width: 7ch;
+			text-align: end;
+			font-size: inherit;
+			border: none;
+			border-bottom: thin solid GrayText;
+			background-color: inherit;
+			color: inherit;
+		}
+
+		[type="number"]::-webkit-inner-spin-button {
+			margin-left: 0.5ch;
+		}
+
+		[type="range"] {
+			flex-grow: 1;
+		}
+
+		[type="range"]::-webkit-slider-runnable-track {
+			border: thin solid ButtonShadow;
+		}
+
+		[type="range"]::-webkit-slider-thumb {
+			padding: var(--track-height) 0;
+			margin: calc(var(--track-height) / -2) 0;
+		}
+
+		[type="range"]::-moz-range-track {
+			height: var(--track-height);
+			border: thin solid ButtonShadow;
+		}
+
+		[type="range"]::-moz-range-thumb {
+			padding: calc(var(--track-height) / 2) 0;
+		}
+
+		.TempRange::-webkit-slider-runnable-track {
+			background: var(--heat-gradient);
+		}
+
+		.YearRange::-webkit-slider-runnable-track {
+			background: linear-gradient(to right, var(--blocks), 75%, LinkText);
+		}
+
+		.TempRange::-moz-range-track {
+			background: var(--heat-gradient);
+		}
+
+		.YearRange::-moz-range-track {
+			background: linear-gradient(to right, var(--blocks), 75%, LinkText);
+		}
+
+		/*** Table ***/
+		ol {
+			display: grid;
+			transform-style: preserve-3d;
+			/* create stacking context for isotopes */
+			padding: calc(var(--margin)*1.5) var(--2margin) var(--2margin) var(--margin);
+		}
+
+		ol {
+			grid-template-columns: var(--periods) repeat(var(--groups), minmax(0, 1fr));
+		}
+
+		.Legend,
+		ol>li {
+			white-space: nowrap;
+			padding: var(--element-pad);
+		}
+
+		ol li>*,
+		.Legend>*,
+		figure>output>* {
+			line-height: 1;
+			display: block;
+			font-style: normal;
+			font-weight: normal;
+		}
+
+		figure abbr,
+		li>abbr {
+			font-weight: 600;
+		}
+
+		/*** Element boxes ***/
+		figure b,
+		ol>*>b {
+			font-size: 0.65em;
+			font-weight: normal;
+			speak: never;
+		}
+
+		ol>*>abbr {
+			font-size: 0.9em;
+		}
+
+		em,
+		data {
+			font-size: 0.55em;
+		}
+
+		data {
+			text-overflow: ellipsis;
+			overflow: hidden;
+		}
+
+		:lang(zh) ol>*>abbr {
+			font-size: 0.7em;
+		}
+
+		:lang(zh) ol>*>em {
+			font-size: 0.75em;
+		}
+
+		/* adds up to 1.45em just like 0.9+0.55 */
+		small {
+			font-size: 0.38em;
+			text-align: end;
+		}
+
+		/*** Table interior ***/
+		.Period,
+		.Group {
+			color: var(--group);
+			line-height: 1;
+		}
+
+		.Period {
+			align-self: center;
+			text-align: right;
+			padding-right: calc(var(--margin) / 2);
+			z-index: 2;
+		}
+
+		.Removed6,
+		.Removed7 {
+			margin-right: var(--fixedgridgap);
+		}
+
+		.Group>a {
+			font-size: 0.5em;
+			display: block;
+		}
+
+		.Group {
+			text-align: center;
+		}
+
+		.Parentheses {
+			font-size: 0.7em;
+			margin: var(--margin) var(--2margin);
+			align-self: center;
+		}
+
+		.Label57to71,
+		.Label89to103 {
+			font-size: 0.65em;
+			align-self: center;
+			text-align: center;
+		}
+
+		/*** Grid Positioning ***/
+		.KeyRegion {
+			grid-column: 4 / span 10;
+			grid-row: 2 / span 3;
+		}
+
+		[data-wide="15"] .KeyRegion {
+			grid-column-end: span 14;
+		}
+
+		.G3 {
+			grid-column-start: calc(var(--groups) - 14);
+		}
+
+		.WideGap,
+		.WideKeyRegion {
+			display: none;
+		}
+
+		.VerticalInner {
+			grid-column-start: 4;
+			grid-row: 7 / span 5;
+		}
+
+		.Legend {
+			grid-column-start: 3;
+			grid-row-start: 2;
+		}
+
+		.OldSlider {
+			grid-column-end: span 5;
+			grid-row-start: 2;
+		}
+
+		.PosterLogo {
+			grid-column: 1 / span 3;
+			grid-row: 9 / span 3;
+		}
+
+		.Parentheses {
+			grid-column-end: span calc(var(--groups) - 3);
+		}
+
+		.Removed6,
+		.Removed7,
+		.Label57to71,
+		.Label89to103 {
+			grid-column-start: 4;
+			pointer-events: none;
+		}
+
+		li.Lanthanoid,
+		.Removed6 {
+			grid-row-start: 10;
+		}
+
+		li.Actinoid,
+		.Removed7 {
+			grid-row-start: 11;
+		}
+
+		.Label57to71 {
+			grid-row-start: 7;
+			z-index: 2;
+		}
+
+		.Label89to103 {
+			grid-row-start: 8;
+			z-index: 2;	
+		}	
+
+		/*** Input/accessibility ***/	
+		header input[type="radio"],	
+		.SearchConsole input[type="radio"],
+		ul input[type="radio"],
+		header input[type="checkbox"] {
+			position: absolute;
+			opacity: 0;
+			clip-path: polygon(0 0);
+		}
+
+		.RangeNumbers label,
+		.Unknown output.Unknown {
+			background-color: inherit;
+			color: GrayText;
+		}
+
+		button {
+			font-size: 1em;
+		}
+
+		/*** Ads ***/
+		.Notice {
+			display: flex;
+			align-items: center;
+			max-width: 100%;
+			min-height: calc(90px + 1px + 2px);
+			overflow: hidden;
+			color: GrayText;
+			padding-top: 1px;
+			padding-bottom: 2px;
+		}
+
+		.Notice>div {
+			display: flex;
+			flex-direction: column;
+			align-self: stretch;
+			justify-content: space-between;
+		}
+
+		.Notice>div>button {
+			margin: 0 var(--margin);
+			align-self: flex-start;
+		}
+
+		.Notice>div>button::after {
+			content: "✕";
+		}
+
+		.Notice>div>span {
+			text-align: center;
+		}
+
+		.Notice>div>span::before {
+			content: "«Ad";
+		}
+
+		.adsbygoogle {
+			display: block;
+			height: 90px;
+			flex-grow: 1;
+			text-align: center;
+			margin: 0 var(--margin);
+			z-index: 1 !important;
+		}
+
+		blockquote {
+			padding: 0 calc(2 * var(--2margin));
+			font-size: min(0.8em, 32px);
+			margin: 0;
+		}
+
+		blockquote>form {
+			display: inline;
+		}
+
+		blockquote>form>* {
+			font-size: inherit;
+		}
+
+		ins[data-adsbygoogle-status="done"]+blockquote,
+		ins:not([data-adsbygoogle-status])~div
+
+		/*ins.adsbygoogle:not(:empty) + blockquote*/
+			{
+			display: none;
+		}
+
+		/*** Search ***/
+		.SearchConsole {
+			position: absolute;
+			margin: var(--margin);
+			transform: translateX(calc(var(--rtl) * -50%));
+			visibility: hidden;
+			white-space: nowrap;
+		}
+
+		/*** Footer ***/
+		footer {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			margin: 0 calc(var(--square) + 2 * var(--2margin));
+			--square-vw: 20;
+			/* recalc --square in :root or flips between 18/20vw from top/sidebar on Reset */
+		}
+
+		footer> :first-child {
+			display: none;
+		}
+
+		addr {
+			flex-basis: 100%;
+			color: GrayText;
+			margin: var(--2margin) 0;
+			font-size: 0.6em;
+			text-align: center;
+		}
+
+		addr a {
+			color: inherit;
+		}
+
+		footer select {
+			font: inherit;
+		}
+
+		footer label {
+			color: var(--tab-active);
+			vertical-align: text-top;
+		}
+
+		footer>dl {
+			break-inside: avoid;
+		}
+
+		footer dt {
+			font-size: 0.9em;
+			margin-bottom: var(--margin);
+			text-transform: uppercase;
+			letter-spacing: 0.1em;
+		}
+
+		footer dd {
+			font-size: 0.8em;
+			line-height: 1;
+			margin: var(--margin) 0;
+		}
+
+		footer svg {
+			width: 1em;
+			margin-inline-end: 0.3em;
+			vertical-align: bottom;
+		}
+
+		.FullScreen footer {
+			display: none;
+		}
+
+		/*** Series Colors ***/
+		.Alkali .Alkali,
+		figure.Alkali {
+			background-color: var(--alkali);
+		}
+
+		.Alkaline .Alkaline,
+		figure.Alkaline {
+			background-color: var(--alkaline);
+		}
+
+		.Lanthanoid .Lanthanoid,
+		figure.Lanthanoid {
+			background-color: var(--lanthanoid);
+		}
+
+		.Actinoid .Actinoid,
+		figure.Actinoid {
+			background-color: var(--actinoid);
+		}
+
+		.Transition .Transition,
+		figure.Transition {
+			background-color: var(--transition);
+		}
+
+		.Poor .Poor,
+		figure.Poor {
+			background-color: var(--poor);
+		}
+
+		.Metalloid .Metalloid,
+		figure.Metalloid {
+			background-color: var(--metalloid);
+		}
+
+		.Nonmetal .Nonmetal,
+		figure.Nonmetal {
+			background-color: var(--nonmetal);
+		}
+
+		.Noble .Noble,
+		figure.Noble {
+			background-color: var(--noble);
+		}
+
+		.Unknown .Unknown,
+		figure.Unknown {
+			background-color: var(--nocategory);
+		}
+
+		.VerticalInner {
+			background-color: var(--divider);
+			border-color: var(--divideroutline);
+		}
+
+		/*** Series Legend ***/
+		.state .Series>* {
+			background-color: transparent;
+		}
+
+		.Series {
+			display: grid;
+			grid-auto-flow: column;
+			grid-template-rows: repeat(3, auto);
+			font-size: 0.7em;
+			min-width: 0;
+			overflow-wrap: anywhere;
+		}
+
+		.Series>* {
+			padding: 0.15em;
+			display: flex;
+			/* expands A to fill container */
+		}
+
+		.Series>*>a {
+			flex-grow: 1;
+		}
+
+		.Series>dt {
+			font-weight: 600;
+		}
+
+		.Series>dt:not(.Metalloid):hover {
+			background-color: var(--selected);
+		}
+
+		.Series>dd {
+			writing-mode: vertical-rl;
+			grid-row-end: span 2;
+		}
+
+		.Series>dd>a {
+			display: block;
+			max-height: 8em;
+			/* Firefox eats line breaks otherwise */
+		}
+
+		.Series>.Metals {
+			grid-column-end: span 5;
+			text-align: center;
+			border-top-left-radius: var(--margin);
+			border-color: rgb(var(--text));
+		}
+
+		.Series>.Metalloid {
+			grid-row-end: span 3;
+			writing-mode: vertical-rl;
+		}
+
+		.Series>.Nonmetals {
+			grid-column-end: span 2;
+			text-align: center;
+			border-top-right-radius: var(--margin);
+			border-color: rgb(var(--text));
+		}
+
+		.Series>.Lanthanoid,
+		.Series>.Actinoid {
+			writing-mode: initial;
+			grid-row-end: span 1;
+		}
+
+		/*** State of Matter Legend ***/
+		dl {
+			margin: 0;
+		}
+
+		.StateKey {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+		}
+
+		.StateKey>div {
+			display: flex;
+			align-items: baseline;
+		}
+
+		.StateKey dt {
+			width: 1.4em;
+			line-height: 1.4;
+			box-sizing: content-box;
+			text-align: center;
+			font-weight: 600;
+		}
+
+		.StateKey dd {
+			margin-inline-start: var(--margin);
+			white-space: nowrap;
+		}
+
+		/*** State of Matter Colors ***/
+		dt.Solid,
+		dt.Solid+dd,
+		.Solid>abbr {
+			color: var(--solid);
+		}
+
+		dt.Liquid,
+		dt.Liquid+dd,
+		.Liquid>abbr {
+			color: var(--liquid);
+		}
+
+		dt.Gas,
+		dt.Gas+dd,
+		.Gas>abbr {
+			color: var(--gas);
+		}
+
+		dt.UnknownState,
+		dt.UnknownState+dd,
+		.UnknownState>abbr {
+			color: var(--unknown);
+		}
+
+		@keyframes solid {
+			to {
+				background-color: var(--solid);
+				color: var(--blocks);
+			}
+		}
+
+		@keyframes liquid {
+			to {
+				background-color: var(--liquid);
+				color: var(--blocks);
+			}
+		}
+
+		@keyframes gas {
+			to {
+				background-color: var(--gas);
+				color: var(--blocks);
+			}
+		}
+
+		@keyframes unknown {
+			to {
+				background-color: var(--unknown);
+				color: var(--blocks);
+			}
+		}
+
+		.Solid,
+		.Solid>abbr {
+			animation: solid 0s step-start;
+		}
+
+		.Liquid,
+		.Liquid>abbr {
+			animation: liquid 0s step-start;
+		}
+
+		.Gas,
+		.Gas>abbr {
+			animation: gas 0s step-start;
+		}
+
+		.UnknownState,
+		.UnknownState>abbr {
+			animation: unknown 0s step-start;
+		}
+
+		li.White,
+		li.White>abbr {
+			color: white !important;
+		}
+
+		li.Black,
+		li.Black>abbr {
+			color: black !important;
+		}
+
+		.Reset .Delay:not(.Shine) li,
+		.Property .series .Delay li,
+		.Property .name .Delay li {
+			animation-duration: 1s;
+		}
+
+		#Ptable li>abbr {
+			animation-duration: inherit;
+			animation-iteration-count: inherit;
+		}
+
+		.Solid .Solid,
+		.Liquid .Liquid,
+		.Gas .Gas,
+		.UnknownState .UnknownState {
+			animation-duration: 5s;
+			animation-iteration-count: infinite;
+		}
+
+		.state dt {
+			animation-fill-mode: forwards;
+		}
+
+		html:not(.Property):not(.Reset) abbr,
+		.Property article:not(.name):not(.series):not(.melt):not(.boil) abbr {
+			color: rgb(var(--text));
+		}
+
+		/*** Borders and Gaps ***/
+		ol>li,
+		.Series>dd,
+		.Series>.Metalloid,
+		.CompoundDragTarget li {
+			border-color: var(--bordercolor);
+		}
+
+		.StateOfMatter dt,
+		.PropertyKey>dl,
+		.Blocks dt,
+		.ConfigBlocks>div>div>div,
+		.CompoundDragTarget li,
+		.Series>*,
+		.VerticalInner {
+			border-width: var(--border-width);
+			border-style: solid;
+		}
+
+		.Series>.Nonmetals,
+		.Series>.Metals {
+			border-bottom: none;
+		}
+
+		.Legend {
+			border-color: transparent;
+		}
+
+		.Legend,
+		ol>li:not(.Tope) {
+			border-width: var(--fixedborderwidth);
+			border-style: solid;
+			outline: 0 solid var(--tab-hover);
+		}
+
+		.VerticalInner {
+			border-radius: var(--border-width);
+			box-shadow: 0 0 0 var(--border-width) var(--divideroutline);
+		}
+
+		ol {
+			grid-gap: var(--gridgap);
+		}
+
+		.Series {
+			grid-gap: var(--fixedgridgap);
+		}
+
+		.StateOfMatter dt {
+			border-color: rgb(var(--text));
+		}
+
+		/*** Margins ***/
+		header {
+			margin-bottom: var(--margin);
+		}
+
+		.Notice {
+			margin: var(--2margin) var(--margin) 0;
+		}
+
+		main,
+		ol,
+		figure {
+			margin: var(--margin);
+		}
+
+		/*** Legend and Data holders ***/
+		.KeyRegion {
+			contain: size;
+		}
+
+		.KeyRegion a {
+			color: inherit !important;
+		}
+
+		.DataRegion {
+			position: relative;
+			/* for gradients */
+		}
+
+		.DataRegion::before {
+			background: linear-gradient(to bottom, var(--body-bg), var(--body-bg-trans));
+			content: "";
+			position: absolute;
+			height: var(--margin);
+			top: 0;
+			left: 0;
+			right: 0;
+			z-index: 2;
+		}
+
+		.DataRegion::after {
+			background: linear-gradient(to top, var(--body-bg), var(--body-bg-trans));
+			content: "";
+			position: absolute;
+			height: var(--margin);
+			bottom: 0;
+			left: 0;
+			right: 0;
+		}
+
+		.KeyRegion,
+		.DataRegion {
+			display: flex;
+			overflow-x: hidden;
+			/* overflow-x: scroll; -ms-overflow-style: none; scroll-snap-type: mandatory; scroll-snap-stop: always; scrollbar-width: none; scroll-snap-points-x: repeat(100%); scroll-snap-type: x mandatory; -ms-scroll-snap-type: mandatory; */
+		}
+
+		.KeyRegion>* {
+			display: flex;
+			padding: var(--2margin);
+		}
+
+		.KeyRegion> :not(.IsotopeKey) {
+			gap: var(--2margin);
+		}
+
+		.DataRegion>* {
+			padding: var(--margin);
+			overflow-y: auto
+				/*overlay*/
+			;
+			font-size: 0.65em;
+		}
+
+		.DataRegion>*,
+		.KeyRegion>* {
+			min-width: 100%;
+			/* scroll-snap-align: start; */
+		}
+
+		.SeriesState,
+		.PropertyKey,
+		.ElectronKey,
+		.IsotopeKey>*,
+		.CompoundKey {
+			justify-content: space-evenly;
+		}
+
+		/* PropertyKey > :not(.IsotopeKey) ? */
+
+		/* Top bar, default */
+		main {
+			flex-direction: column;
+		}
+
+		aside {
+			flex-direction: row;
+		}
+
+		/* Height-width auto scaling */
+		body>* {
+			padding: 0 min((100% - 100 * var(--aspect-ratio)) / 2, (100% - var(--min) / var(--sidebar-shrink) * var(--groupfactor) - var(--2margin)) / 2);
+			/* from ol min-width */
+		}
+
+		html {
+			font-size: calc(var(--base-vw) * var(--aspect-ratio));
+		}
+
+		.Slider,
+		.DataRegion,
+		/* Next 3 get sidebar-shrink since they shrink when it's is active */
+		.SearchConsole {
+			font-size: calc(var(--base-vw) * var(--aspect-ratio) * var(--sidebar-shrink));
+		}
+
+		/* Include groupfactor since Table shrinks when it goes wide */
+		ol {
+			font-size: calc(var(--base-vw) * var(--aspect-ratio) * var(--sidebar-shrink) / var(--groupfactor));
+			/* minfont already takes into account sidebar so undo it by multiplying so table is 768px wide minimum. */
+			min-width: calc(var(--min) * var(--groupfactor) - 2 * var(--2margin));
+		}
+
+		:root {
+			--aspect-ratio: 1vw;
+			--square: calc(var(--square-vw) * var(--aspect-ratio));
+			/* no min/max, fit to width only */
+		}
+
+		@supports (font-size: min(1vw, 1vh)) {
+			:root,
+			footer
+
+			/* recalc */
+				{
+				--square: calc(var(--square-vw) * max(var(--min) / var(--sidebar-shrink) / 100, var(--aspect-ratio)));
+			}
+
+			html {
+				font-size: max(var(--base-vw) * var(--aspect-ratio), var(--minfont));
+			}
+
+			.Slider,
+			.DataRegion,
+			/* Next 3 get sidebar-shrink since they shrink when it's is active */
+			.SearchConsole {
+				font-size: max(var(--base-vw) * var(--aspect-ratio) * var(--sidebar-shrink), var(--minfont));
+			}
+
+			ol {
+				font-size: max(var(--base-vw) * var(--aspect-ratio) * var(--sidebar-shrink) / var(--groupfactor), var(--minfont) * var(--sidebar-shrink));
+			}
+
+			/* minfont already takes into account sidebar so undo it by multiplying so table is 768px wide minimum. */
+			:root {
+				--aspect-ratio: min(1vw, 1.183vh + (var(--groups) - 18) * 0.05vh);
+			}
+
+			/* 1st vh: topbar, 2nd: topbar + wide */
+			.Sidebar {
+				--aspect-ratio: min(1vw, 1.85vh + (var(--groups) - 18) * 0.109vh);
+			}
+
+			/* 1st vh: sidebar, 2nd: sidebar + wide */
+			.Reset {
+				--aspect-ratio: min(1vw, 1.51vh + (var(--groups) - 18) * 0.095vh);
+			}
+
+			/* 1st vh: reset, 2nd: reset + wide */
+		}
+
+		@media (max-width: 768px) {
+
+			/* Also in --min */
+			main>article {
+				overflow-x: auto;
+			}
+		}
+
+		@media (max-width: 1365px) {
+
+			/* --min * --groupfactor */
+			:root:not([data-wide="0"]) main>article {
+				overflow-x: auto;
+			}
+		}
+
+		@media (max-width: 550px),
+		(display-mode: standalone) {
+			.MenuButton+label {
+				display: flex;
+				padding-inline-start: var(--margin);
+			}
+
+			footer {
+				display: flex;
+				flex-direction: column;
+				visibility: hidden;
+				transform: translateX(calc(var(--rtl) * -100%));
+				z-index: 2;
+				position: absolute;
+				top: calc(1.25 * var(--2margin) + var(--tab-height));
+				bottom: 0;
+				font-size: 3vh;
+				margin: 0;
+				padding: 3vh;
+				background-color: inherit;
+				box-shadow: 0 19px 38px var(--darkshadow), 0 15px 12px var(--lightshadow);
+			}
+
+			addr {
+				flex-basis: unset;
+			}
+
+			addr>span {
+				display: none;
+			}
+
+			footer.Menu {
+				transform: translateX(0);
+				visibility: visible;
+			}
+		}
+
+		@media (max-width: 550px) {
+
+			/* Mobile */
+			:root {
+				--square: 33vh;
+				--min-rows: 2.5;
+				--margin: 1.7vw;
+				--icon-height: 5vw;
+				--track-height: var(--2margin);
+				--bordercolor: transparent;
+				--element-pad: 0.15em;
+			}
+
+			.KeyRegion {
+				--margin: 4.5px;
+				/* Table has a min-width on mobile of 1024 pixels? */
+				--2margin: calc(var(--margin) * 2);
+			}
+
+			:root.Dark {}
+
+			html,
+			body {
+				background-color: var(--blocks);
+			}
+
+			header,
+			.Slider {
+				background-color: var(--body-bg);
+			}
+
+			header,
+			aside {
+				min-width: unset;
+			}
+
+			footer> :first-child {
+				display: initial;
+			}
+
+			.Notice {
+				margin: var(--margin) 0;
+				padding: 0;
+				min-height: 100px;
+				/* 300x100 mobile ad slot */
+			}
+
+			.adsbygoogle {
+				height: 100px;
+			}
+
+			blockquote {
+				font-size: min(1em, 14px);
+			}
+
+			blockquote>span {
+				display: none;
+			}
+
+			aside {
+				min-height: calc(var(--row-height) * var(--min-rows));
+			}
+
+			aside canvas {
+				height: unset;
+			}
+
+			.Reset aside {
+				--min-rows: 0;
+			}
+
+			main aside figure {
+				display: none;
+			}
+
+			.DataRegion>*,
+			.Slider {
+				font-size: 120%;
+				padding: 0;
+			}
+
+			nav {
+				--tab-height: 6vw;
+				position: fixed;
+				bottom: 0;
+				width: 100%;
+				z-index: 2;
+				align-items: center;
+				background-color: inherit;
+			}
+
+			.adsbygoogle[data-adsbygoogle-status="done"],
+			nav :checked+label {
+				box-shadow: none;
+			}
+
+			nav>label {
+				flex-direction: column;
+				text-align: center;
+				flex-basis: calc(100% / 4);
+			}
+
+			header>label {
+				color: var(--group);
+			}
+
+			header>*>svg+a {
+				display: none;
+			}
+
+			header svg+a {
+				margin-inline-start: 0;
+			}
+
+			.FillMask {
+				fill: var(--body-bg);
+			}
+
+			.Raised+label {
+				display: none;
+			}
+
+			.MenuButton+label {
+				margin-inline-end: auto;
+			}
+
+			.RangeNumbers input:not([data-unit="C"]),
+			.RangeNumbers input:not([data-unit="C"])+label {
+				display: none;
+			}
+
+			/* FIX: Show temp matching their degree dropdown */
+
+			section.SearchConsole {
+				z-index: 2;
+				top: 0;
+				width: 100%;
+				align-items: center;
+				margin: 0;
+				justify-content: flex-end;
+				opacity: 0;
+				transform: none;
+			}
+
+			div.SearchAnchor {
+				margin-inline-start: unset;
+			}
+
+			.SearchActive header {
+				position: sticky;
+				top: 0;
+				z-index: 2;
+			}
+
+			.SearchActive .SearchConsole {
+				position: fixed;
+				pointer-events: none;
+				opacity: 1;
+				padding-inline-start: calc(3 * var(--2margin) + var(--tab-height) + var(--tab-height) * var(--logo-ratio));
+				padding-inline-end: calc(4 * var(--margin) + var(--tab-height));
+			}
+
+			.SearchActive .MenuButton+label {
+				margin-inline-end: 0;
+			}
+
+			.SearchActive .SearchConsole ul {
+				display: none;
+			}
+
+			.SearchConsole>[type=search] {
+				max-width: 0;
+			}
+
+			.SearchActive [type=search] {
+				max-width: 100%;
+				pointer-events: auto;
+			}
+
+			ol,
+			nav {
+				box-shadow: 0 1px 3px var(--lightshadow), 0 1px 2px var(--darkshadow);
+			}
+
+			main,
+			main>article,
+			ol {
+				margin: 0;
+			}
+
+			.DataRegion::before {
+				background: none;
+				box-shadow: inset 0 0 4px var(--lightshadow), inset 0 0 3px var(--darkshadow);
+				bottom: 0;
+				height: unset;
+				pointer-events: none;
+			}
+
+			.DataRegion::after {
+				display: none;
+			}
+
+			.DataRegion ul {
+				display: initial;
+			}
+
+			.Electrons #orbital_lmn {
+				white-space: unset;
+			}
+
+			article .Slider {
+				touch-action: pan-y pinch-zoom;
+				left: 0;
+				margin-inline-start: 0;
+			}
+
+			[dir="rtl"] article .Slider {
+				left: unset;
+				right: 0;
+			}
+
+			.Slider [type="button"] {
+				display: none;
+			}
+
+			nav {
+				height: 12vw;
+			}
+
+			header,
+			.SearchConsole {
+				height: 12vw;
+				margin-bottom: 0;
+			}
+
+			footer {
+				top: 12vw;
+			}
+
+			main {
+				max-height: calc(100vh - 12vw);
+			}
+
+			main>article {
+				flex-shrink: 0;
+				margin-bottom: 12vw;
+				min-height: calc(var(--min) / 1.8);
+				/* reserved to minimize CLS */
+			}
+
+			ol>li>abbr,
+			ol>li:not(.Tope),
+			ul>input:checked+li {
+				transition: none !important;
+			}
+
+			.SearchActive article ol,
+			ol.Tilt {
+				transform: none;
+			}
+		}
+
+		/* font-variant-numeric: tabular-nums; MAYBE */
+	</style>
+	<link rel="stylesheet" href="asset/" media="print" onload="this.media='all'; this.onload = null;">
+
+	<script nomodule>window.location.replace("https://old.ptable.com/");</script>
+	<script type="module">
+		if (!("reversed" in document.createElement("ol"))) window.location.replace("https://old.ptable.com/");
+		window.reportError = function (e) {
+			if (window.Bugsnag) window.Bugsnag.notify(e);
+			else console.log(e);
+		}
+	</script>
+
+	<script type="module" src="asset/" crossorigin></script>
+	<link rel="modulepreload" href="js/bugsnag-f0c206ee.js">
+	<link rel="modulepreload" href="js/extra-4bfde388.js">
+</head>
+
+<body>
+	<!-- toggled classes: Overlay, SearchActive -->
+
+	<center>Bảng Tuần Hoàn Hóa Học</center>
+	<h6><center>Lương Nhật Minh - 9A4</center></h6>
+
+	<section id="Notice" class="Notice">
+		<ins class="adsbygoogle" data-ad-client="ca-pub-1899956715581914" data-ad-slot="1123424162"
+			disable-ad-format="horizontal" disable-full-width-responsive="true"></ins>
+		<div>
+			<button></button>
+			<span></span>
+		</div>
+	</section>
+
+	<main
+		class="AlphaEmission ProtonEmission TwoProtonEmission NeutronEmission TwoNeutronEmission SpontaneousFission BetaDecay DoubleBetaDecay BetaPlusDecay DoubleBetaPlusDecay ElectronCapture Stable">
+		<!-- toggled classes: [DecayMode WIPED] -->
+
+		<article id="PropertyClass" class="series">
+			<!-- Nested so flex-direction can treat this as a group when flipping from top to sidebar. -->
+			<!-- toggled classes: [property WIPED] -->
+			<section id="SliderYear" class="Slider SliderYear">
+				<label for="YearRange">Year</label>
+				<input type="button" id="YearSub" value="－" data-skip="-1">
+				<input type="range" id="YearRange" class="YearRange" min="1730" max="2022" value="2022">
+				<input type="button" id="YearAdd" value="＋" data-skip="+1">
+				<div class="RangeNumbers">
+					<input type="number" id="Year" min="1730" max="2022" value="2022"><label for="Year">CE</label>
+				</div>
+			</section>
+
+			<div class="SearchAnchor"> <!-- Nested to provide origin or slider won't push search down. -->
+				<section id="SearchConsole" class="SearchConsole">
+					<input type="search" id="SearchBox" class="SearchBox" data-placeholderatomic="79"
+						data-placeholderproperty="<20, =7, 3-10">
+					<ul id="SearchType">
+						<span>Search for: </span>
+						<input type="radio" name="searchtype" value="atomic" id="AtomicSearch">
+						<li><label for="AtomicSearch">Atomic number</label></li>
+						<input type="radio" name="searchtype" value="property" id="PropertySearch" checked>
+						<li><label for="PropertySearch">Property values</label></li>
+					</ul>
+				</section>
+			</div>
+
+			<ol id="Ptable"
+				class="Hover Alkali Alkaline Lanthanoid Actinoid Transition Poor Metalloid Nonmetal Noble Unknown s p d f"
+				data-classes="Alkali Alkaline Lanthanoid Actinoid Transition Poor Metalloid Nonmetal Noble Unknown s p d f"
+				dir="ltr">
+				<!-- toggled classes: Hover, Fanned, Tilt, Delay, Shine, [Series], [Block] -->
+				<div class="Group"></div>
+				<div class="Group" data-num="1">1</div>
+				<div class="Group" data-num="2">2</div>
+				<div class="Group G3" data-num="3">3</div>
+				<div class="Group" data-num="4">4</div>
+				<div class="Group" data-num="5">5</div>
+				<div class="Group" data-num="6">6</div>
+				<div class="Group" data-num="7">7</div>
+				<div class="Group" data-num="8">8</div>
+				<div class="Group" data-num="9">9</div>
+				<div class="Group" data-num="10">10</div>
+				<div class="Group" data-num="11">11</div>
+				<div class="Group" data-num="12">12</div>
+				<div class="Group" data-num="13">13</div>
+				<div class="Group" data-num="14">14</div>
+				<div class="Group"><span data-num="15">15</span><a
+						href="https://en.wikipedia.org/wiki/Pnictogen">Pnictogens</a></div>
+				<div class="Group"><span data-num="16">16</span><a
+						href="https://en.wikipedia.org/wiki/Chalcogen">Chalcogens</a></div>
+				<div class="Group"><span data-num="17">17</span><a
+						href="https://en.wikipedia.org/wiki/Halogen">Halogens</a></div>
+				<div class="Group" data-num="18">18</div>
+				<section id="KeyRegion" class="KeyRegion" dir="ltr">
+					<div id="SeriesState" class="SeriesState">
+						<dl id="StateOfMatter" class="StateKey StateOfMatter">
+							<div>
+								<dt class="Solid" data-state="Solid">C</dt>
+								<dd><a href="https://en.wikipedia.org/wiki/Solid">Chất Rắn</a></dd>
+							</div>
+							<div>
+								<dt class="Liquid" data-state="Liquid">Hg</dt>
+								<dd><a href="https://en.wikipedia.org/wiki/Liquid">Chất Lỏng</a></dd>
+							</div>
+							<div>
+								<dt class="Gas" data-state="Gas">H</dt>
+								<dd><a href="https://en.wikipedia.org/wiki/Gas">Khí Ga</a></dd>
+							</div>
+							<div>
+								<dt class="UnknownState" data-state="Unknown">Rf</dt>
+								<dd><a href="https://en.wikipedia.org/wiki/State_of_matter">Trạng thái của vật chất</a></dd>
+							</div>
+						</dl>
+						<dl id="Series" class="Series" dir="ltr">
+							<dt class="Metals" data-classes="Alkali Alkaline Lanthanoid Actinoid Transition Poor"><a
+									href="https://en.wikipedia.org/wiki/Metal">Kim loại</a></dt>
+							<dd class="Alkali"><a href="https://en.wikipedia.org/wiki/Alkali_metal">Kim Loại Kiềm</a>
+							</dd>
+							<dd class="Alkaline"><a href="https://en.wikipedia.org/wiki/Alkaline_earth_metal">Kim loại kiềm thổ</a></dd>
+							<dd class="Lanthanoid"><a href="https://en.wikipedia.org/wiki/Lanthanide">Lanthanoids</a>
+							</dd>
+							<dd class="Actinoid"><a href="https://en.wikipedia.org/wiki/Actinide">Actinoids</a></dd>
+							<dd class="Transition"><a href="https://en.wikipedia.org/wiki/Transition_metal">Kim loại chuyển tiếp</a></dd>
+							<dd class="Poor"><a
+									href="https://en.wikipedia.org/wiki/Post-transition_metal">Hậu chuyển đổi
+									metals</a></dd>
+							<dt class="Metalloid"><a href="https://en.wikipedia.org/wiki/Metalloid">á kim</a></dt>
+							<dt class="Nonmetals" data-classes="Nonmetal Noble"><a
+									href="https://en.wikipedia.org/wiki/Nonmetal">Phi kim</a></dt>
+							<dd class="Nonmetal"><a
+									href="https://en.wikipedia.org/wiki/Nonmetal#Reactive_nonmetal">Phi kim phản ứng								</a></dd>
+							<dd class="Noble"><a href="https://en.wikipedia.org/wiki/Noble_gas">khí trơ</a></dd>
+						</dl>
+					</div>
+
+					<div id="PropertyKey" class="PropertyKey">
+						<dl class="Colors">
+							<legend>Color</legend>
+							<div>
+								<div>
+									<div><label for="SchemeStart">Minimum</label> <input type="color" name="SchemeStart"
+											id="SchemeStart"></div>
+									<div><label for="SchemeZero">Zero</label> <input type="color" name="SchemeZero"
+											id="SchemeZero"></div>
+									<div><label for="SchemeEnd">Maximum</label> <input type="color" name="SchemeEnd"
+											id="SchemeEnd"></div>
+								</div>
+								<div id="RangeGradient"></div>
+							</div>
+							<div>
+								<div>
+									<div><label for="SchemeUnknown">Unknown</label> <input type="color"
+											name="SchemeUnknown" id="SchemeUnknown"></div>
+								</div>
+								<div id="UnknownSwatch"></div>
+							</div>
+						</dl>
+
+						<!--
+ <dl>
+  <legend>Scheme</legend>
+  <ul>
+   <input id="SchemeReset" type="button" value="Reset">
+   <input type="button" value="Save">
+  </ul>
+ </dl>
+-->
+
+						<dl>
+							<legend>Scale</legend>
+							<ul id="SchemeScale" class="SchemeScale">
+								<input type="radio" name="SchemeScale" id="Linear" value="lin">
+								<li><label for="Linear">Linear</label></li>
+
+								<input type="radio" name="SchemeScale" id="Logarithmic" value="log">
+								<li><label for="Logarithmic">Logarithmic</label></li>
+								<!--
+   <input type="radio" name="SchemeScale" id="Exponential" value="exp">
+   <li><label for="Exponential">Exponential</label></li>
+-->
+							</ul>
+						</dl>
+					</div>
+
+					<div class="ElectronKey">
+						<dl id="Blocks" class="StateKey Blocks">
+							<div>
+								<dt class="s">s</dt>
+								<dd>block</dd>
+							</div>
+							<div>
+								<dt class="p">p</dt>
+								<dd>block</dd>
+							</div>
+							<div>
+								<dt class="d">d</dt>
+								<dd>block</dd>
+							</div>
+							<div>
+								<dt class="f">f</dt>
+								<dd>block</dd>
+							</div>
+						</dl>
+
+						<div id="ConfigBlocks" class="ConfigBlocks" dir="ltr">
+							<div class="BlockS">
+								<div><span>1s</span>
+									<div></div>
+								</div>
+								<div><span>2s</span>
+									<div></div>
+								</div>
+								<div><span>3s</span>
+									<div></div>
+								</div>
+								<div><span>4s</span>
+									<div></div>
+								</div>
+								<div><span>5s</span>
+									<div></div>
+								</div>
+								<div><span>6s</span>
+									<div></div>
+								</div>
+								<div><span>7s</span>
+									<div></div>
+								</div>
+							</div>
+							<div class="BlockP">
+								<div><span>2p</span>
+									<div></div>
+									<div></div>
+									<div></div>
+								</div>
+								<div><span>3p</span>
+									<div></div>
+									<div></div>
+									<div></div>
+								</div>
+								<div><span>4p</span>
+									<div></div>
+									<div></div>
+									<div></div>
+								</div>
+								<div><span>5p</span>
+									<div></div>
+									<div></div>
+									<div></div>
+								</div>
+								<div><span>6p</span>
+									<div></div>
+									<div></div>
+									<div></div>
+								</div>
+								<div><span>7p</span>
+									<div></div>
+									<div></div>
+									<div></div>
+								</div>
+							</div>
+							<div class="BlockD">
+								<div><span>3d</span>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+								</div>
+								<div><span>4d</span>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+								</div>
+								<div><span>5d</span>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+								</div>
+								<div><span>6d</span>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+								</div>
+							</div>
+							<div class="BlockF">
+								<div><span>4f</span>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+								</div>
+								<div><span>5f</span>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+									<div></div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="IsotopeKey">
+						<div data-placeholder="Select an element to display all known isotopes"></div>
+						<!--
+ <div>
+  <dl class="Colors">
+  <legend>Colors</legend>
+  <div>
+   <div>
+    <div><label for="SchemeStart">Min</label> <input type="color" name="SchemeStart" id="SchemeStart"></div>
+    <div><label for="SchemeZero">Zero</label> <input type="color" name="SchemeZero" id="SchemeZero"></div>
+    <div><label for="SchemeEnd">Max</label> <input type="color" name="SchemeEnd" id="SchemeEnd"></div>
+   </div>
+   <div id="RangeGradient"></div>
+  </div>
+  <div>
+   <div>
+    <div><label for="SchemeUnknown">N/A</label> <input type="color" name="SchemeUnknown" id="SchemeUnknown"></div>
+   </div>
+   <div id="UnknownSwatch"></div>
+  </div>
+ </dl> -->
+						<dl id="DecayModes" class="DecayModes StateKey">
+							<div>
+								<dt class="AlphaEmission">α</dt>
+								<dd><a href="https://en.wikipedia.org/wiki/Alpha_decay">Alpha decay</a></dd>
+							</div>
+							<div>
+								<dt class="TwoProtonEmission ProtonEmission">p</dt>
+								<dd><a href="https://en.wikipedia.org/wiki/Proton_emission">Proton emission</a></dd>
+							</div>
+							<div>
+								<dt class="TwoNeutronEmission NeutronEmission">n</dt>
+								<dd><a href="https://en.wikipedia.org/wiki/Neutron_emission">Neutron emission</a></dd>
+							</div>
+							<div>
+								<dt class="SpontaneousFission">SF</dt>
+								<dd><a href="https://en.wikipedia.org/wiki/Spontaneous_fission">Spontaneous fission</a>
+								</dd>
+							</div>
+							<div>
+								<dt class="DoubleBetaDecay BetaDecay">β⁻</dt>
+								<dd><a href="https://en.wikipedia.org/wiki/Beta_decay">Beta decay</a></dd>
+							</div>
+							<div>
+								<dt class="DoubleBetaPlusDecay BetaPlusDecay">β⁺</dt>
+								<dd><a href="https://en.wikipedia.org/wiki/Positron_emission">Positron emission</a></dd>
+							</div>
+							<div>
+								<dt class="ElectronCapture">ϵ</dt>
+								<dd><a href="https://en.wikipedia.org/wiki/Electron_capture">Electron capture</a></dd>
+							</div>
+							<div>
+								<dt class="Stable"> </dt>
+								<dd><a href="https://en.wikipedia.org/wiki/Stable_nuclide">Stable</a></dd>
+							</div>
+							<button id="RemoveIsotopes">✕</button>
+						</dl>
+						<!-- </div>-->
+					</div>
+
+					<div class="CompoundKey">
+						<div id="CompoundDragTarget" class="CompoundDragTarget"
+							data-placeholder="Drag elements inside to create compounds"
+							data-placeholder-click="Select elements to create compounds"></div>
+					</div>
+
+				</section> <!-- KeyRegion -->
+				<div class="WideKeyRegion"></div>
+
+				<div class="OldSlider"></div>
+
+				<div id="Legend" class="Legend">
+				</div>
+				<div class="Period" data-num="1">1</div>
+				<li class="Nonmetal s Gas">
+					<a href="https://en.wikipedia.org/wiki/Hydrogen">Xem H</a>
+					<b>1</b>
+					<abbr>H</abbr>
+					<em>Hydrogen</em>
+					<data data-abridged="1.008">1.008</data>
+				</li>
+				<li class="Noble s Gas">
+					<a href="https://en.wikipedia.org/wiki/Helium">Xem He</a>
+					<b>2</b>
+					<abbr>He</abbr>
+					<em>Helium</em>
+					<data data-abridged="4.0026">4.0026</data>
+				</li>
+				<div class="Period" data-num="2">2</div>
+				<li class="Alkali s Solid">
+					<a href="https://en.wikipedia.org/wiki/Lithium">Xem Li </a>
+					<b>3</b>
+					<abbr>Li</abbr>
+					<em>Lithium</em>
+					<data data-abridged="6.94">6.94</data>
+				</li>
+				<li class="Alkaline s Solid">
+					<a href="https://en.wikipedia.org/wiki/Beryllium">Xem Be</a>
+					<b>4</b>
+					<abbr>Be</abbr>
+					<em>Beryllium</em>
+					<data data-abridged="9.0122">9.0122</data>
+				</li>
+				<li class="Metalloid p Solid">
+					<a href="https://en.wikipedia.org/wiki/Boron">Xem B</a>
+					<b>5</b>
+					<abbr>B</abbr>
+					<em>Boron</em>
+					<data data-abridged="10.81">10.81</data>
+				</li>
+				<li class="Nonmetal p Solid">
+					<a href="https://en.wikipedia.org/wiki/Carbon">Xem C</a>
+					<b>6</b>
+					<abbr>C</abbr>
+					<em>Carbon</em>
+					<data data-abridged="12.011">12.011</data>
+				</li>
+				<li class="Nonmetal p Gas">
+					<a href="https://en.wikipedia.org/wiki/Nitrogen">Xem N</a>
+					<b>7</b>
+					<abbr>N</abbr>
+					<em>Nitrogen</em>
+					<data data-abridged="14.007">14.007</data>
+				</li>
+				<li class="Nonmetal p Gas">
+					<a href="https://en.wikipedia.org/wiki/Oxygen">Xem O</a>
+					<b>8</b>
+					<abbr>O</abbr>
+					<em>Oxygen</em>
+					<data data-abridged="15.999">15.999</data>
+				</li>
+				<li class="Nonmetal p Gas">
+					<a href="https://en.wikipedia.org/wiki/Fluorine">Xem F</a>
+					<b>9</b>
+					<abbr>F</abbr>
+					<em>Fluorine</em>
+					<data data-abridged="18.998">18.998</data>
+				</li>
+				<li class="Noble p Gas">
+					<a href="https://en.wikipedia.org/wiki/Neon">Xem Ne</a>
+					<b>10</b>
+					<abbr>Ne</abbr>
+					<em>Neon</em>
+					<data data-abridged="20.180">20.180</data>
+				</li>
+				<div class="Period" data-num="3">3</div>
+				<li class="Alkali s Solid">
+					<a href="https://en.wikipedia.org/wiki/Sodium">Xem Na</a>
+					<b>11</b>
+					<abbr>Na</abbr>
+					<em>Sodium</em>
+					<data data-abridged="22.990">22.990</data>
+				</li>
+				<li class="Alkaline s Solid">
+					<a href="https://en.wikipedia.org/wiki/Magnesium">Xem Mg</a>
+					<b>12</b>
+					<abbr>Mg</abbr>
+					<em>Magnesium</em>
+					<data data-abridged="24.305">24.305</data>
+				</li>
+				<li class="Poor p Solid">
+					<a href="https://en.wikipedia.org/wiki/Aluminium">Xem Al</a>
+					<b>13</b>
+					<abbr>Al</abbr>
+					<em>Aluminium</em>
+					<data data-abridged="26.982">26.982</data>
+				</li>
+				<li class="Metalloid p Solid">
+					<a href="https://en.wikipedia.org/wiki/Silicon">Xem Si</a>
+					<b>14</b>
+					<abbr>Si</abbr>
+					<em>Silicon</em>
+					<data data-abridged="28.085">28.085</data>
+				</li>
+				<li class="Nonmetal p Solid">
+					<a href="https://en.wikipedia.org/wiki/Phosphorus">Xem P</a>
+					<b>15</b>
+					<abbr>P</abbr>
+					<em>Phosphorus</em>
+					<data data-abridged="30.974">30.974</data>
+				</li>
+				<li class="Nonmetal p Solid">
+					<a href="https://en.wikipedia.org/wiki/Sulfur">Xem S</a>
+					<b>16</b>
+					<abbr>S</abbr>
+					<em>Sulfur</em>
+					<data data-abridged="32.06">32.06</data>
+				</li>
+				<li class="Nonmetal p Gas">
+					<a href="https://en.wikipedia.org/wiki/Chlorine">Xem Cl</a>
+					<b>17</b>
+					<abbr>Cl</abbr>
+					<em>Chlorine</em>
+					<data data-abridged="35.45">35.45</data>
+				</li>
+				<li class="Noble p Gas">
+					<a href="https://en.wikipedia.org/wiki/Argon">Xem Ar</a>
+					<b>18</b>
+					<abbr>Ar</abbr>
+					<em>Argon</em>
+					<data data-abridged="39.948">39.948</data>
+				</li>
+				<div class="Period" data-num="4">4</div>
+				<li class="Alkali s Solid">
+					<a href="https://en.wikipedia.org/wiki/Potassium">Xem K</a>
+					<b>19</b>
+					<abbr>K</abbr>
+					<em>Potassium</em>
+					<data data-abridged="39.098">39.098</data>
+				</li>
+				<li class="Alkaline s Solid">
+					<a href="https://en.wikipedia.org/wiki/Calcium">Xem Ca</a>
+					<b>20</b>
+					<abbr>Ca</abbr>
+					<em>Calcium</em>
+					<data data-abridged="40.078">40.078</data>
+				</li>
+				<div class="WideGap"></div>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Scandium">Xem Sc</a>
+					<b>21</b>
+					<abbr>Sc</abbr>
+					<em>Scandium</em>
+					<data data-abridged="44.956">44.956</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Titanium">Xem Ti</a>
+					<b>22</b>
+					<abbr>Ti</abbr>
+					<em>Titanium</em>
+					<data data-abridged="47.867">47.867</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Vanadium">Xem V</a>
+					<b>23</b>
+					<abbr>V</abbr>
+					<em>Vanadium</em>
+					<data data-abridged="50.942">50.942</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Chromium">Xem Cr</a>
+					<b>24</b>
+					<abbr>Cr</abbr>
+					<em>Chromium</em>
+					<data data-abridged="51.996">51.996</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Manganese">Xem Mn</a>
+					<b>25</b>
+					<abbr>Mn</abbr>
+					<em>Manganese</em>
+					<data data-abridged="54.938">54.938</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Iron">Xem Fe</a>
+					<b>26</b>
+					<abbr>Fe</abbr>
+					<em>Iron</em>
+					<data data-abridged="55.845">55.845</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Cobalt">Xem Co</a>
+					<b>27</b>
+					<abbr>Co</abbr>
+					<em>Cobalt</em>
+					<data data-abridged="58.933">58.933</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Nickel">Xem Ni</a>
+					<b>28</b>
+					<abbr>Ni</abbr>
+					<em>Nickel</em>
+					<data data-abridged="58.693">58.693</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Copper">Xem Cu</a>
+					<b>29</b>
+					<abbr>Cu</abbr>
+					<em>Copper</em>
+					<data data-abridged="63.546">63.546</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Zinc">Xem Zn</a>
+					<b>30</b>
+					<abbr>Zn</abbr>
+					<em>Zinc</em>
+					<data data-abridged="65.38">65.38</data>
+				</li>
+				<li class="Poor p Solid">
+					<a href="https://en.wikipedia.org/wiki/Gallium">Xem Ga</a>
+					<b>31</b>
+					<abbr>Ga</abbr>
+					<em>Gallium</em>
+					<data data-abridged="69.723">69.723</data>
+				</li>
+				<li class="Metalloid p Solid">
+					<a href="https://en.wikipedia.org/wiki/Germanium">Xem Ge</a>
+					<b>32</b>
+					<abbr>Ge</abbr>
+					<em>Germanium</em>
+					<data data-abridged="72.630">72.630</data>
+				</li>
+				<li class="Metalloid p Solid">
+					<a href="https://en.wikipedia.org/wiki/Arsenic">Xem As</a>
+					<b>33</b>
+					<abbr>As</abbr>
+					<em>Arsenic</em>
+					<data data-abridged="74.922">74.922</data>
+				</li>
+				<li class="Nonmetal p Solid">
+					<a href="https://en.wikipedia.org/wiki/Selenium">Xem Se</a>
+					<b>34</b>
+					<abbr>Se</abbr>
+					<em>Selenium</em>
+					<data data-abridged="78.971">78.971</data>
+				</li>
+				<li class="Nonmetal p Liquid">
+					<a href="https://en.wikipedia.org/wiki/Bromine">Xem Br</a>
+					<b>35</b>
+					<abbr>Br</abbr>
+					<em>Bromine</em>
+					<data data-abridged="79.904">79.904</data>
+				</li>
+				<li class="Noble p Gas">
+					<a href="https://en.wikipedia.org/wiki/Krypton">Xem Kr</a>
+					<b>36</b>
+					<abbr>Kr</abbr>
+					<em>Krypton</em>
+					<data data-abridged="83.798">83.798</data>
+				</li>
+				<div class="Period" data-num="5">5</div>
+				<li class="Alkali s Solid">
+					<a href="https://en.wikipedia.org/wiki/Rubidium">Xem Rb</a>
+					<b>37</b>
+					<abbr>Rb</abbr>
+					<em>Rubidium</em>
+					<data data-abridged="85.468">85.468</data>
+				</li>
+				<li class="Alkaline s Solid">
+					<a href="https://en.wikipedia.org/wiki/Strontium">Xem Sr</a>
+					<b>38</b>
+					<abbr>Sr</abbr>
+					<em>Strontium</em>
+					<data data-abridged="87.62">87.62</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Yttrium">Xem Y</a>
+					<b>39</b>
+					<abbr>Y</abbr>
+					<em>Yttrium</em>
+					<data data-abridged="88.906">88.906</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Zirconium">Xem Zr</a>
+					<b>40</b>
+					<abbr>Zr</abbr>
+					<em>Zirconium</em>
+					<data data-abridged="91.224">91.224</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Niobium">Xem Nb</a>
+					<b>41</b>
+					<abbr>Nb</abbr>
+					<em>Niobium</em>
+					<data data-abridged="92.906">92.906</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Molybdenum">Xem Mo</a>
+					<b>42</b>
+					<abbr>Mo</abbr>
+					<em>Molybdenum</em>
+					<data data-abridged="95.95">95.95</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Technetium">Xem Tc</a>
+					<b>43</b>
+					<abbr>Tc</abbr>
+					<em>Technetium</em>
+					<data data-abridged="98" data-unstable="1">(98)</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Ruthenium">Xem Ru</a>
+					<b>44</b>
+					<abbr>Ru</abbr>
+					<em>Ruthenium</em>
+					<data data-abridged="101.07">101.07</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Rhodium">Xem Rh</a>
+					<b>45</b>
+					<abbr>Rh</abbr>
+					<em>Rhodium</em>
+					<data data-abridged="102.91">102.91</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Palladium">Xem Pd</a>
+					<b>46</b>
+					<abbr>Pd</abbr>
+					<em>Palladium</em>
+					<data data-abridged="106.42">106.42</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Silver">Xem Ag</a>
+					<b>47</b>
+					<abbr>Ag</abbr>
+					<em>Silver</em>
+					<data data-abridged="107.87">107.87</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Cadmium">Xem Cd</a>
+					<b>48</b>
+					<abbr>Cd</abbr>
+					<em>Cadmium</em>
+					<data data-abridged="112.41">112.41</data>
+				</li>
+				<li class="Poor p Solid">
+					<a href="https://en.wikipedia.org/wiki/Indium">Xem In</a>
+					<b>49</b>
+					<abbr>In</abbr>
+					<em>Indium</em>
+					<data data-abridged="114.82">114.82</data>
+				</li>
+				<li class="Poor p Solid">
+					<a href="https://en.wikipedia.org/wiki/Tin">Xem Sn</a>
+					<b>50</b>
+					<abbr>Sn</abbr>
+					<em>Tin</em>
+					<data data-abridged="118.71">118.71</data>
+				</li>
+				<li class="Metalloid p Solid">
+					<a href="https://en.wikipedia.org/wiki/Antimony">Xem Sb</a>
+					<b>51</b>
+					<abbr>Sb</abbr>
+					<em>Antimony</em>
+					<data data-abridged="121.76">121.76</data>
+				</li>
+				<li class="Metalloid p Solid">
+					<a href="https://en.wikipedia.org/wiki/Tellurium">Xem Te</a>
+					<b>52</b>
+					<abbr>Te</abbr>
+					<em>Tellurium</em>
+					<data data-abridged="127.60">127.60</data>
+				</li>
+				<li class="Nonmetal p Solid">
+					<a href="https://en.wikipedia.org/wiki/Iodine">Xem I</a>
+					<b>53</b>
+					<abbr>I</abbr>
+					<em>Iodine</em>
+					<data data-abridged="126.90">126.90</data>
+				</li>
+				<li class="Noble p Gas">
+					<a href="https://en.wikipedia.org/wiki/Xenon">Xem Xe</a>
+					<b>54</b>
+					<abbr>Xe</abbr>
+					<em>Xenon</em>
+					<data data-abridged="131.29">131.29</data>
+				</li>
+				<div class="Period" data-num="6">6</div>
+				<li class="Alkali s Solid">
+					<a href="https://en.wikipedia.org/wiki/Caesium">Xem Cs</a>
+					<b>55</b>
+					<abbr>Cs</abbr>
+					<em>Caesium</em>
+					<data data-abridged="132.91">132.91</data>
+				</li>
+				<li class="Alkaline s Solid">
+					<a href="https://en.wikipedia.org/wiki/Barium">Xem Ba</a>
+					<b>56</b>
+					<abbr>Ba</abbr>
+					<em>Barium</em>
+					<data data-abridged="137.33">137.33</data>
+				</li>
+				
+			
+				
+				<li class="Lanthanoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Lanthanum">Xem La</a>
+					<b>57</b>
+					<abbr>La</abbr>
+					<em>Lanthanum</em>
+					<data data-abridged="138.91">138.91</data>
+				</li>
+				<li class="Lanthanoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Cerium">Xem Ce</a>
+					<b>58</b>
+					<abbr>Ce</abbr>
+					<em>Cerium</em>
+					<data data-abridged="140.12">140.12</data>
+				</li>
+				<li class="Lanthanoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Praseodymium">Xem Pr</a>
+					<b>59</b>
+					<abbr>Pr</abbr>
+					<em>Praseodymium</em>
+					<data data-abridged="140.91">140.91</data>
+				</li>
+				<li class="Lanthanoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Neodymium">Xem Nd</a>
+					<b>60</b>
+					<abbr>Nd</abbr>
+					<em>Neodymium</em>
+					<data data-abridged="144.24">144.24</data>
+				</li>
+				<li class="Lanthanoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Promethium">Xem Pm</a>
+					<b>61</b>
+					<abbr>Pm</abbr>
+					<em>Promethium</em>
+					<data data-abridged="145" data-unstable="1">(145)</data>
+				</li>
+				<li class="Lanthanoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Samarium">Xem Sm</a>
+					<b>62</b>
+					<abbr>Sm</abbr>
+					<em>Samarium</em>
+					<data data-abridged="150.36">150.36</data>
+				</li>
+				<li class="Lanthanoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Europium">Xem Eu</a>
+					<b>63</b>
+					<abbr>Eu</abbr>
+					<em>Europium</em>
+					<data data-abridged="151.96">151.96</data>
+				</li>
+				<li class="Lanthanoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Gadolinium">Xem Gd</a>
+					<b>64</b>
+					<abbr>Gd</abbr>
+					<em>Gadolinium</em>
+					<data data-abridged="157.25">157.25</data>
+				</li>
+				<li class="Lanthanoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Terbium">Xem Tb</a>
+					<b>65</b>
+					<abbr>Tb</abbr>
+					<em>Terbium</em>
+					<data data-abridged="158.93">158.93</data>
+				</li>
+				<li class="Lanthanoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Dysprosium">Xem Dy</a>
+					<b>66</b>
+					<abbr>Dy</abbr>
+					<em>Dysprosium</em>
+					<data data-abridged="162.50">162.50</data>
+				</li>
+				<li class="Lanthanoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Holmium">Xem Ho</a>
+					<b>67</b>
+					<abbr>Ho</abbr>
+					<em>Holmium</em>
+					<data data-abridged="164.93">164.93</data>
+				</li>
+				<li class="Lanthanoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Erbium">Xem Er</a>
+					<b>68</b>
+					<abbr>Er</abbr>
+					<em>Erbium</em>
+					<data data-abridged="167.26">167.26</data>
+				</li>
+				<li class="Lanthanoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Thulium">Xem Tm</a>
+					<b>69</b>
+					<abbr>Tm</abbr>
+					<em>Thulium</em>
+					<data data-abridged="168.93">168.93</data>
+				</li>
+				<li class="Lanthanoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Ytterbium">Xem Yb</a>
+					<b>70</b>
+					<abbr>Yb</abbr>
+					<em>Ytterbium</em>
+					<data data-abridged="173.05">173.05</data>
+				</li>
+				<li class="Lanthanoid d Solid">
+					<a href="https://en.wikipedia.org/wiki/Lutetium">Xem Lu</a>
+					<b>71</b>
+					<abbr>Lu</abbr>
+					<em>Lutetium</em>
+					<data data-abridged="174.97">174.97</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Hafnium">Xem Hf</a>
+					<b>72</b>
+					<abbr>Hf</abbr>
+					<em>Hafnium</em>
+					<data data-abridged="178.49">178.49</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Tantalum">Xem Ta</a>
+					<b>73</b>
+					<abbr>Ta</abbr>
+					<em>Tantalum</em>
+					<data data-abridged="180.95">180.95</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Tungsten">Xem W</a>
+					<b>74</b>
+					<abbr>W</abbr>
+					<em>Tungsten</em>
+					<data data-abridged="183.84">183.84</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Rhenium">Xem Re</a>
+					<b>75</b>
+					<abbr>Re</abbr>
+					<em>Rhenium</em>
+					<data data-abridged="186.21">186.21</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Osmium">Xem Os</a>
+					<b>76</b>
+					<abbr>Os</abbr>
+					<em>Osmium</em>
+					<data data-abridged="190.23">190.23</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Iridium">Xem Ir</a>
+					<b>77</b>
+					<abbr>Ir</abbr>
+					<em>Iridium</em>
+					<data data-abridged="192.22">192.22</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Platinum">Xem Pt</a>
+					<b>78</b>
+					<abbr>Pt</abbr>
+					<em>Platinum</em>
+					<data data-abridged="195.08">195.08</data>
+				</li>
+				<li class="Transition d Solid">
+					<a href="https://en.wikipedia.org/wiki/Gold">Xem Au</a>
+					<b>79</b>
+					<abbr>Au</abbr>
+					<em>Gold</em>
+					<data data-abridged="196.97">196.97</data>
+				</li>
+				<li class="Transition d Liquid" data-wiki="Mercury (element)">
+					<a href="https://en.wikipedia.org/wiki/Mercury">Xem Hg</a>
+					<b>80</b>
+					<abbr>Hg</abbr>
+					<em>Mercury</em>
+					<data data-abridged="200.59">200.59</data>
+				</li>
+				<li class="Poor p Solid">
+					<a href="https://en.wikipedia.org/wiki/Thallium">Xem Tl</a>
+					<b>81</b>
+					<abbr>Tl</abbr>
+					<em>Thallium</em>
+					<data data-abridged="204.38">204.38</data>
+				</li>
+				<li class="Poor p Solid">
+					<a href="https://en.wikipedia.org/wiki/Lead">Xem Pb</a>
+					<b>82</b>
+					<abbr>Pb</abbr>
+					<em>Lead</em>
+					<data data-abridged="207.2">207.2</data>
+				</li>
+				<li class="Poor p Solid">
+					<a href="https://en.wikipedia.org/wiki/Bismuth">Xem Bi</a>
+					<b>83</b>
+					<abbr>Bi</abbr>
+					<em>Bismuth</em>
+					<data data-abridged="208.98">208.98</data>
+				</li>
+				<li class="Poor p Solid">
+					<a href="https://en.wikipedia.org/wiki/Polonium">Xem Po</a>
+					<b>84</b>
+					<abbr>Po</abbr>
+					<em>Polonium</em>
+					<data data-abridged="209" data-unstable="1">(209)</data>
+				</li>
+				<li class="Metalloid p Solid">
+					<a href="https://en.wikipedia.org/wiki/Astatine">Xem At</a>
+					<b>85</b>
+					<abbr>At</abbr>
+					<em>Astatine</em>
+					<data data-abridged="210" data-unstable="1">(210)</data>
+				</li>
+				<li class="Noble p Gas">
+					<a href="https://en.wikipedia.org/wiki/Radon">Xem Rn</a>
+					<b>86</b>
+					<abbr>Rn</abbr>
+					<em>Radon</em>
+					<data data-abridged="222" data-unstable="1">(222)</data>
+				</li>
+				<li class="Alkali s Solid"
+					<b></b>
+					<abbr></abbr>
+					<em></em>
+					<data data-abridged="223" data-unstable="1"></data>
+				</li>
+				<div class="Period" data-num="7">7</div>
+				<li class="Alkali s Solid">
+					<a href="https://en.wikipedia.org/wiki/Francium">Xem Fr</a>
+					<b>87</b>
+					<abbr>Fr</abbr>
+					<em>Francium</em>
+					<data data-abridged="223" data-unstable="1">(223)</data>
+				</li>
+				<li class="Alkaline s Solid">
+					<a href="https://en.wikipedia.org/wiki/Radium">Xem Ra</a>
+					<b>88</b>
+					<abbr>Ra</abbr>
+					<em>Radium</em>
+					<data data-abridged="226" data-unstable="1">(226)</data>
+				</li>
+
+				</div>
+				<li class="Actinoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Actinium">Xem Ac</a>
+					<b>89</b>
+					<abbr>Ac</abbr>
+					<em>Actinium</em>
+					<data data-abridged="227" data-unstable="1">(227)</data>
+				</li>
+				<li class="Actinoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Thorium">Xem Th</a>
+					<b>90</b>
+					<abbr>Th</abbr>
+					<em>Thorium</em>
+					<data data-abridged="232.04">232.04</data>
+				</li>
+				<li class="Actinoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Protactinium">Xem Pa</a>
+					<b>91</b>
+					<abbr>Pa</abbr>
+					<em>Protactinium</em>
+					<data data-abridged="231.04">231.04</data>
+				</li>
+				<li class="Actinoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Uranium">Xem U</a>
+					<b>92</b>
+					<abbr>U</abbr>
+					<em>Uranium</em>
+					<data data-abridged="238.03">238.03</data>
+				</li>
+				<li class="Actinoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Neptunium">Xem Np</a>
+					<b>93</b>
+					<abbr>Np</abbr>
+					<em>Neptunium</em>
+					<data data-abridged="237" data-unstable="1">(237)</data>
+				</li>
+				<li class="Actinoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Plutonium">Xem Pu</a>
+					<b>94</b>
+					<abbr>Pu</abbr>
+					<em>Plutonium</em>
+					<data data-abridged="244" data-unstable="1">(244)</data>
+				</li>
+				<li class="Actinoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Americium">Xem Am</a>
+					<b>95</b>
+					<abbr>Am</abbr>
+					<em>Americium</em>
+					<data data-abridged="243" data-unstable="1">(243)</data>
+				</li>
+				<li class="Actinoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Curium">Xem Cm</a>
+					<b>96</b>
+					<abbr>Cm</abbr>
+					<em>Curium</em>
+					<data data-abridged="247" data-unstable="1">(247)</data>
+				</li>
+				<li class="Actinoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Berkelium">Xem Bk</a>
+					<b>97</b>
+					<abbr>Bk</abbr>
+					<em>Berkelium</em>
+					<data data-abridged="247" data-unstable="1">(247)</data>
+				</li>
+				<li class="Actinoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Californium">Xem Cf</a>
+					<b>98</b>
+					<abbr>Cf</abbr>
+					<em>Californium</em>
+					<data data-abridged="251" data-unstable="1">(251)</data>
+				</li>
+				<li class="Actinoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Einsteinium">Xem Es</a>
+					<b>99</b>
+					<abbr>Es</abbr>
+					<em>Einsteinium</em>
+					<data data-abridged="252" data-unstable="1">(252)</data>
+				</li>
+				<li class="Actinoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Fermium">Xem Fm</a>
+					<b>100</b>
+					<abbr>Fm</abbr>
+					<em>Fermium</em>
+					<data data-abridged="257" data-unstable="1">(257)</data>
+				</li>
+				<li class="Actinoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Mendelevium">Xem Md</a>
+					<b>101</b>
+					<abbr>Md</abbr>
+					<em>Mendelevium</em>
+					<data data-abridged="258" data-unstable="1">(258)</data>
+				</li>
+				<li class="Actinoid f Solid">
+					<a href="https://en.wikipedia.org/wiki/Nobelium">Xem No</a>
+					<b>102</b>
+					<abbr>No</abbr>
+					<em>Nobelium</em>
+					<data data-abridged="259" data-unstable="1">(259)</data>
+				</li>
+				<li class="Actinoid d Solid">
+					<a href="https://en.wikipedia.org/wiki/Lawrencium">Xem Lr</a>
+					<b>103</b>
+					<abbr>Lr</abbr>
+					<em>Lawrencium</em>
+					<data data-abridged="266" data-unstable="1">(266)</data>
+				</li>
+				<li class="Transition d UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Rutherfordium">Xem Rf</a>
+					<b>104</b>
+					<abbr>Rf</abbr>
+					<em>Rutherfordium</em>
+					<data data-abridged="267" data-unstable="1">(267)</data>
+				</li>
+				<li class="Transition d UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Dubnium">Xem Db</a>
+					<b>105</b>
+					<abbr>Db</abbr>
+					<em>Dubnium</em>
+					<data data-abridged="268" data-unstable="1">(268)</data>
+				</li>
+				<li class="Transition d UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Seaborgium">Xem Sg</a>
+					<b>106</b>
+					<abbr>Sg</abbr>
+					<em>Seaborgium</em>
+					<data data-abridged="269" data-unstable="1">(269)</data>
+				</li>
+				<li class="Transition d UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Bohrium">Xem Bh</a>
+					<b>107</b>
+					<abbr>Bh</abbr>
+					<em>Bohrium</em>
+					<data data-abridged="270" data-unstable="1">(270)</data>
+				</li>
+				<li class="Transition d UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Hassium">Xem Hs</a>
+					<b>108</b>
+					<abbr>Hs</abbr>
+					<em>Hassium</em>
+					<data data-abridged="277" data-unstable="1">(277)</data>
+				</li>
+				<li class="Unknown d UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Meitnerium">Xem Mt</a>
+					<b>109</b>
+					<abbr>Mt</abbr>
+					<em>Meitnerium</em>
+					<data data-abridged="278" data-unstable="1">(278)</data>
+				</li>
+				<li class="Unknown d UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Darmstadtium">Xem Ds</a>
+					<b>110</b>
+					<abbr>Ds</abbr>
+					<em>Darmstadtium</em>
+					<data data-abridged="281" data-unstable="1">(281)</data>
+				</li>
+				<li class="Unknown d UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Roentgenium">Xem Rg</a>
+					<b>111</b>
+					<abbr>Rg</abbr>
+					<em>Roentgenium</em>
+					<data data-abridged="282" data-unstable="1">(282)</data>
+				</li>
+				<li class="Unknown d UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Copernicium">Xem Cn</a>
+					<b>112</b>
+					<abbr>Cn</abbr>
+					<em>Copernicium</em>
+					<data data-abridged="285" data-unstable="1">(285)</data>
+				</li>
+				<li class="Unknown p UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Nihonium">Xem Nh</a>
+					<b>113</b>
+					<abbr>Nh</abbr>
+					<em>Nihonium</em>
+					<data data-abridged="286" data-unstable="1">(286)</data>
+				</li>
+				<li class="Unknown p UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Flerovium">Xem Fl</a>
+					<b>114</b>
+					<abbr>Fl</abbr>
+					<em>Flerovium</em>
+					<data data-abridged="289" data-unstable="1">(289)</data>
+				</li>
+				<li class="Unknown p UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Moscovium">Xem Mc</a>
+					<b>115</b>
+					<abbr>Mc</abbr>
+					<em>Moscovium</em>
+					<data data-abridged="290" data-unstable="1">(290)</data>
+				</li>
+				<li class="Unknown p UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Livermorium">Xem Lv</a>
+					<b>116</b>
+					<abbr>Lv</abbr>
+					<em>Livermorium</em>
+					<data data-abridged="293" data-unstable="1">(293)</data>
+				</li>
+				<li class="Unknown p UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Tennessine">Xem Ts</a>
+					<b>117</b>
+					<abbr>Ts</abbr>
+					<em>Tennessine</em>
+					<data data-abridged="294" data-unstable="1">(294)</data>
+				</li>
+				<li class="Unknown p UnknownState">
+					<a href="https://en.wikipedia.org/wiki/Oganesson">Xem Og</a>
+					<b>118</b>
+					<abbr>Og</abbr>
+					<em>Oganesson</em>
+					<data data-abridged="294" data-unstable="1">(294)</data>
+				</li>
+				<div class="PosterLogo"></div>
+				<div class="Parentheses" id="Parentheses">Đối với các nguyên tố không có đồng vị ổn định, số khối của đồng vị có chu kỳ bán rã dài nhất nằm trong ngoặc đơn.</div>
+			</ol>
+		</article>
+	</main>
+
+	<footer>
+		<dl>
+			<dt>View</dt>
+			<dd><input type="checkbox" id="WideFooter" name="Wide" class="Button"><label for="WideFooter">Wide</label>
+			<dd><input type="checkbox" id="DarkButtonFooter" name="Dark" class="Button"><label
+					for="DarkButtonFooter">Dark</label>
+		</dl>
+		<dl>
+			<dt>Thông tin</dt>
+			<dd><a href="https://www.facebook.com/profile.php?id=100084512202815">
+					</svg>Họ Tên: Lương Nhật Minh</a>
+			<dd>
+					</svg>Lớp: 9A4</a></dd>
+			<dd>
+						<title>Privacy</title>
+
+					</svg>Cơ Sở: Times City</a></dd>
+		</dl>
+		<dl>
+	</footer>
+
+	<template id="IsotopeSymbol">
+		<abbr><span><sup></sup><sub></sub></span></abbr>
+	</template>
+
+	<template id="CompoundArrows">
+		<div>
+			<button class="Up"></button> <!-- no indent to avoid creating whitespace nodes -->
+			<button class="Down"></button>
+		</div>
+	</template>
+
+</body>
+
+</html>
